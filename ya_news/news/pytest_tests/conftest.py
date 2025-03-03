@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
-import pytest
 
+import pytest
 from django.test.client import Client
 from django.conf import settings
 
@@ -32,27 +32,20 @@ def not_author_client(not_author):
 
 
 @pytest.fixture
-def new():
-    news = News.objects.create(
+def news():
+    return News.objects.create(
         title='Заголовок',
         text='Текст новости',
     )
-    return news
 
 
 @pytest.fixture
-def comments(author, new):
-    comment = Comment.objects.create(
-        news=new,
+def comment(author, news):
+    return Comment.objects.create(
+        news=news,
         text='Текст комментария',
         author=author,
     )
-    return comment
-
-
-@pytest.fixture
-def id_for_args(comments):
-    return (comments.id,)
 
 
 @pytest.fixture
@@ -70,20 +63,20 @@ def create_news():
 
 
 @pytest.fixture
-def create_comments(new, author):
+def create_comments(news, author):
     today = datetime.today()
     all_comments = [
         Comment(
-            news=new,
+            news=news,
             text=f'Просто {index}',
             created=today - timedelta(days=index),
             author=author
         )
-        for index in range(settings.NEWS_COUNT_ON_HOME_PAGE)
+        for index in range(10)
     ]
     Comment.objects.bulk_create(all_comments)
 
 
 @pytest.fixture
 def form_data():
-    return {'text': 'Текст комментария'}
+    return {'text': 'Новый текст'}
