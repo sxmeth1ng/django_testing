@@ -10,18 +10,23 @@ User = get_user_model()
 
 
 class TestRoutes(TestCase):
-    
+
     @classmethod
     def setUpTestData(cls):
         cls.author = User.objects.create(username='Лев Толстой')
         cls.reader = User.objects.create(username='Читатель простой')
-        cls.note = Note.objects.create(title='Заголовок', text='Текст', slug='slug', author=cls.author)
+        cls.note = Note.objects.create(
+            title='Заголовок',
+            text='Текст',
+            slug='slug',
+            author=cls.author
+        )
 
     def test_homepages_availability(self):
         url = reverse('notes:home')
         response = self.client.get(url)
         self.assertEqual(response.status_code, HTTPStatus.OK)
-    
+
     def test_pages_availability(self):
         urls = (
             'notes:list',
@@ -47,7 +52,7 @@ class TestRoutes(TestCase):
                     url = reverse(name, args=(self.note.slug, ))
                     response = self.client.get(url)
                     self.assertEqual(response.status_code, status)
-    
+
     def test_redirect_for_anonymous_client(self):
         urls = (
             ('notes:list', None),
@@ -66,7 +71,7 @@ class TestRoutes(TestCase):
                 redirect_url = f'{login_url}?next={url}'
                 response = self.client.get(url)
                 self.assertRedirects(response, redirect_url)
-    
+
     def test_users_pages_for_anonymoys(self):
         urls = (
             'users:signup',
