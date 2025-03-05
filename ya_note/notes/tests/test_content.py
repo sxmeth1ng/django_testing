@@ -9,6 +9,7 @@ User = get_user_model()
 
 
 class TestContent(TestCase):
+    """Тест-кейс проверяющий создание и оторбражение заметок."""
 
     @classmethod
     def setUpTestData(cls):
@@ -29,6 +30,10 @@ class TestContent(TestCase):
         cls.edit_url = reverse('notes:edit', args=(cls.note.slug,))
 
     def test_note_in_note_list(self):
+        """Тест на заметки.
+
+        Проверка, что заметка отображается только её авторую
+        """
         client_result = (
             (self.author_client, True),
             (self.reader_client, False)
@@ -49,6 +54,11 @@ class TestContent(TestCase):
                 )
 
     def test_form_in_pages(self):
+        """Тест формы.
+
+        Проверка, что на страницах редактирования и создания
+        заметки, есть форма для этого.
+        """
         urls = (
             self.add_url,
             self.edit_url

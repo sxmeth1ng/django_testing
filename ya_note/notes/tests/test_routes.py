@@ -10,6 +10,7 @@ User = get_user_model()
 
 
 class TestRoutes(TestCase):
+    """Тест-кейс проверяющий доступность страниц."""
 
     @classmethod
     def setUpTestData(cls):
@@ -36,6 +37,10 @@ class TestRoutes(TestCase):
         cls.succes_url = reverse('notes:success')
 
     def test_pages_availability(self):
+        """Тест залогиненного пользователя.
+
+        Проверка, что залогинненому пользователю доступны все страницы.
+        """
         urls = (
             self.list_url,
             self.succes_url,
@@ -50,6 +55,10 @@ class TestRoutes(TestCase):
                 self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_pages_availability_for_author(self):
+        """Тест для автора заметки.
+
+        Проверка на то, что автор заметки может редактировать и удалять её.
+        """
         users_statuses = (
             (self.author_client, HTTPStatus.OK),
             (self.reader_client, HTTPStatus.NOT_FOUND),
@@ -61,6 +70,11 @@ class TestRoutes(TestCase):
                     self.assertEqual(response.status_code, status)
 
     def test_pages_for_anonymous_client(self):
+        """Тест для анонимного пользователя.
+
+        Проверка, что анонимный пользователь, при переходе на страницы,
+        кроме домашней, отправляется на страницу регистрации.
+        """
         urls = (
             self.list_url,
             self.succes_url,
