@@ -50,9 +50,9 @@ class TestRoutes(TestCase):
             self.login_url,
             self.logout_url
         )
-        for name in urls:
-            with self.subTest(name=name):
-                response = self.author_client.get(name)
+        for url in urls:
+            with self.subTest(url=url):
+                response = self.author_client.get(url)
                 self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_pages_availability_for_author(self):
@@ -65,9 +65,9 @@ class TestRoutes(TestCase):
             (self.reader_client, HTTPStatus.NOT_FOUND),
         )
         for user, status in users_statuses:
-            for name in (self.edit_url, self.delete_url):
-                with self.subTest(user=user, name=name):
-                    response = user.get(name)
+            for url in (self.edit_url, self.delete_url):
+                with self.subTest(user=user, url=url):
+                    response = user.get(url)
                     self.assertEqual(response.status_code, status)
 
     def test_redirects_for_anonymous_client(self):
@@ -84,10 +84,10 @@ class TestRoutes(TestCase):
             self.add_url,
             self.detail_url
         )
-        for name in urls:
-            with self.subTest(name=name):
-                redirect_url = f'{self.login_url}?next={name}'
-                response = self.client.get(name)
+        for url in urls:
+            with self.subTest(url=url):
+                redirect_url = f'{self.login_url}?next={url}'
+                response = self.client.get(url)
                 self.assertRedirects(response, redirect_url)
 
     def test_pages_for_anonymous(self):
@@ -102,7 +102,7 @@ class TestRoutes(TestCase):
             self.login_url,
             self.logout_url
         )
-        for name in urls:
-            with self.subTest(name=name):
-                response = self.client.get(name)
+        for url in urls:
+            with self.subTest(url=url):
+                response = self.client.get(url)
                 self.assertEqual(response.status_code, HTTPStatus.OK)
