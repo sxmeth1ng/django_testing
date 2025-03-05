@@ -35,16 +35,16 @@ class TestLogic(TestCase):
         cls.add_url = reverse('notes:add')
         cls.edit_url = reverse('notes:edit', args=(cls.note.slug,))
         cls.delete_url = reverse('notes:delete', args=(cls.note.slug,))
-        cls.count_notes_in_db = Note.objects.count()
 
     def test_create_anonymous_note(self):
         """Тест для анонимного пользователяю.
 
         Проверка, что анонимный пользователь не может создать заметку.
         """
-        self.client.post(self.add_url, data=self.form_data)
         notes_count = Note.objects.count()
-        self.assertEqual(notes_count, self.count_notes_in_db)
+        self.client.post(self.add_url, data=self.form_data)
+        expect_notes_count = Note.objects.count()
+        self.assertEqual(expect_notes_count, notes_count)
 
     def test_create_note(self):
         """Тест для залогиненного пользователя.
@@ -67,10 +67,11 @@ class TestLogic(TestCase):
         Проверка, что нельзя создать заметку
         с одинаковым слагом.
         """
+        notes_count = Note.objects.count()
         self.form_data['slug'] = self.note.slug
         response = self.author_client.post(self.add_url, data=self.form_data)
-        notes_count = Note.objects.count()
-        self.assertEqual(notes_count, self.count_notes_in_db)
+        expect_notes_count = Note.objects.count()
+        self.assertEqual(expect_notes_count, notes_count)
         self.assertFormError(
             response,
             'form',
@@ -130,5 +131,6 @@ class TestLogic(TestCase):
         Проверка, что авторизованный пользователь, не может
         удалить чужую заметку.
         """
+        notes_count = Note.objects.count()
         self.reader_client.post(self.delete_url)
-        self.assertEqual(Note.objects.count(), self.count_notes_in_db)
+        self.assertEqual(Note.objects.count(), notes_count)
