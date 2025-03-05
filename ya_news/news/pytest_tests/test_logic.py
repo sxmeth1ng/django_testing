@@ -20,7 +20,7 @@ def test_anonymous_user_cant_create_comment(client, form_data, detail_url):
 
 
 def test_auth_user_create_comment(
-    author_client, form_data, detail_url, author
+    author_client, form_data, detail_url, author, news
 ):
     """Тест для авторизированного пользователя.
 
@@ -31,8 +31,9 @@ def test_auth_user_create_comment(
     count_comments = Comment.objects.count()
     assert count_comments == 1
     comment = Comment.objects.get()
-    assert comment.text == 'Новый текст'
+    assert comment.text == form_data['text']
     assert comment.author == author
+    assert comment.news == news
 
 
 @pytest.mark.parametrize(
@@ -63,7 +64,7 @@ def test_author_can_delete_comment(
 
 
 def test_author_can_edit_comment(
-    author_client, comment, form_data, author, edit_url
+    author_client, comment, form_data, author, edit_url, news
 ):
     """Тест редактирования комментария.
 
@@ -73,6 +74,7 @@ def test_author_can_edit_comment(
     comment.refresh_from_db()
     assert comment.text == form_data['text']
     assert comment.author == author
+    assert comment.news == news
 
 
 def test_not_author_cant_delete_comment(
@@ -96,7 +98,8 @@ def test_not_author_cant_edit_comment(
     не сможет его отредактировать.
     """
     response = not_author_client.post(edit_url, data=form_data)
-    expected_comment = Comment.objects.get()
+    expected_comment = Comment.objects.get(pk=1)
     assert response.status_code == HTTPStatus.NOT_FOUND
     assert comment.text == expected_comment.text
     assert comment.author == expected_comment.author
+    assert comment.news == expected_comment.news

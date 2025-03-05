@@ -65,4 +65,4 @@ def test_form_for_auth_user(not_author_client, detail_url):
     """
     response = not_author_client.get(detail_url)
     assert 'form' in response.context
-    assert isinstance(response.context['form'], CommentForm) is True
+    assert isinstance(response.context['form'], CommentForm)
