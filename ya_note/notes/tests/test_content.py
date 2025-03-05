@@ -44,13 +44,8 @@ class TestContent(TestCase):
                 count_notes = Note.objects.count()
                 self.assertEqual(count_notes, 1)
                 object_list = response.context['object_list']
-                if result:
-                    self.assertIn(self.note, object_list)
-                else:
-                    self.assertNotIn(self.note, object_list)
-                self.assertEqual(
-                    self.note if result else None,
-                    object_list[0] if result else None
+                self.assertIs(
+                    self.note in object_list, result
                 )
 
     def test_form_in_pages(self):

@@ -35,6 +35,7 @@ class TestLogic(TestCase):
         cls.add_url = reverse('notes:add')
         cls.edit_url = reverse('notes:edit', args=(cls.note.slug,))
         cls.delete_url = reverse('notes:delete', args=(cls.note.slug,))
+        cls.count_notes_in_db = Note.objects.count()
 
     def test_create_anonymous_note(self):
         """Тест для анонимного пользователяю.
@@ -43,19 +44,22 @@ class TestLogic(TestCase):
         """
         self.client.post(self.add_url, data=self.form_data)
         notes_count = Note.objects.count()
-        self.assertEqual(notes_count, 1)
+        self.assertEqual(notes_count, self.count_notes_in_db)
 
     def test_create_note(self):
         """Тест для залогиненного пользователя.
 
         Проверка, что авторизованный пользователь может создать заметку.
         """
+        Note.objects.all().delete()
         self.author_client.post(self.add_url, data=self.form_data)
         notes_count = Note.objects.count()
-        self.assertEqual(notes_count, 2)
-        note = Note.objects.get(pk=2)
+        self.assertEqual(notes_count, 1)
+        note = Note.objects.get()
         self.assertEqual(note.text, self.form_data['text'])
         self.assertEqual(note.title, self.form_data['title'])
+        self.assertEqual(note.slug, self.form_data['slug'])
+        self.assertEqual(note.author, self.author)
 
     def test_cant_create_note_with_identical_slug(self):
         """Тест на заметку.
@@ -66,7 +70,7 @@ class TestLogic(TestCase):
         self.form_data['slug'] = self.note.slug
         response = self.author_client.post(self.add_url, data=self.form_data)
         notes_count = Note.objects.count()
-        self.assertEqual(notes_count, 1)
+        self.assertEqual(notes_count, self.count_notes_in_db)
         self.assertFormError(
             response,
             'form',
@@ -80,10 +84,11 @@ class TestLogic(TestCase):
         Проверка, что при незаполненном слаге,
         он создаётся автоматически.
         """
+        Note.objects.all().delete()
         self.form_data.pop('slug')
         self.author_client.post(self.add_url, data=self.form_data)
-        self.assertEqual(Note.objects.count(), 2)
-        new_note = Note.objects.get(pk=2)
+        self.assertEqual(Note.objects.count(), 1)
+        new_note = Note.objects.get()
         expected_slug = slugify(self.form_data['title'])
         self.assertEqual(new_note.slug, expected_slug)
 
@@ -105,8 +110,11 @@ class TestLogic(TestCase):
         чужую заметку.
         """
         self.reader_client.post(self.edit_url, data=self.form_data)
-        note = Note.objects.get()
+        note = Note.objects.get(pk=self.note.pk)
         self.assertEqual(self.note.title, note.title)
+        self.assertEqual(self.note.slug, note.slug)
+        self.assertEqual(self.note.author, note.author)
+        self.assertEqual(self.note.text, note.text)
 
     def test_author_can_delete_note(self):
         """Тест для автора заметки.
@@ -123,4 +131,4 @@ class TestLogic(TestCase):
         удалить чужую заметку.
         """
         self.reader_client.post(self.delete_url)
-        self.assertEqual(Note.objects.count(), 1)
+        self.assertEqual(Note.objects.count(), self.count_notes_in_db)

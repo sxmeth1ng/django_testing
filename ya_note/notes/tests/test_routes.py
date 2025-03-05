@@ -35,6 +35,7 @@ class TestRoutes(TestCase):
         cls.logout_url = reverse('users:logout')
         cls.home_url = reverse('notes:home')
         cls.succes_url = reverse('notes:success')
+        cls.detail_url = reverse('notes:detail', args=(cls.note.slug,))
 
     def test_pages_availability(self):
         """Тест залогиненного пользователя.
@@ -69,11 +70,11 @@ class TestRoutes(TestCase):
                     response = user.get(name)
                     self.assertEqual(response.status_code, status)
 
-    def test_pages_for_anonymous_client(self):
+    def test_redirects_for_anonymous_client(self):
         """Тест для анонимного пользователя.
 
         Проверка, что анонимный пользователь, при переходе на страницы,
-        кроме домашней, отправляется на страницу регистрации.
+        отправляется на страницу регистрации.
         """
         urls = (
             self.list_url,
@@ -81,14 +82,27 @@ class TestRoutes(TestCase):
             self.edit_url,
             self.delete_url,
             self.add_url,
-            self.home_url
+            self.detail_url
         )
         for name in urls:
             with self.subTest(name=name):
-                if name == self.home_url:
-                    response = self.client.get(name)
-                    self.assertEqual(response.status_code, HTTPStatus.OK)
-                else:
-                    redirect_url = f'{self.login_url}?next={name}'
-                    response = self.client.get(name)
-                    self.assertRedirects(response, redirect_url)
+                redirect_url = f'{self.login_url}?next={name}'
+                response = self.client.get(name)
+                self.assertRedirects(response, redirect_url)
+
+    def test_pages_for_anonymous(self):
+        """Тест для анонимного пользователя.
+
+        Проверка, что ему доступны главная страница,
+        страницы регистрации, входа и выхода из аккаунта.
+        """
+        urls = (
+            self.home_url,
+            self.signup_url,
+            self.login_url,
+            self.logout_url
+        )
+        for name in urls:
+            with self.subTest(name=name):
+                response = self.client.get(name)
+                self.assertEqual(response.status_code, HTTPStatus.OK)
