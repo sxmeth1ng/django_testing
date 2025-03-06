@@ -97,8 +97,8 @@ def test_not_author_cant_edit_comment(
     Проверка, что читатель комментария,
     не сможет его отредактировать.
     """
-    expected_comment = Comment.objects.get(pk=comment.pk)
     response = not_author_client.post(edit_url, data=form_data)
+    expected_comment = Comment.objects.get(pk=comment.pk)
     assert response.status_code == HTTPStatus.NOT_FOUND
     assert comment.text == expected_comment.text
     assert comment.author == expected_comment.author
