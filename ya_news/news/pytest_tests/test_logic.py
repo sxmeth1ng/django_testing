@@ -90,16 +90,15 @@ def test_not_author_cant_delete_comment(
 
 
 def test_not_author_cant_edit_comment(
-    not_author_client, comment, form_data, edit_url, news
+    not_author_client, comment, form_data, edit_url
 ):
     """Тест редактирования комментария.
 
     Проверка, что читатель комментария,
     не сможет его отредактировать.
     """
+    expected_comment = Comment.objects.get(pk=comment.pk)
     response = not_author_client.post(edit_url, data=form_data)
-    expected_comment = Comment.objects.get(pk=news.pk)
-    print(expected_comment)
     assert response.status_code == HTTPStatus.NOT_FOUND
     assert comment.text == expected_comment.text
     assert comment.author == expected_comment.author
